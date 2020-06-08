@@ -1,7 +1,7 @@
 set(OSMFIXER_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 if (COMMAND cpplint_add_subdirectory)
-	cpplint_add_subdirectory(osmfixer)
+	cpplint_add_subdirectory(staty)
 endif()
 
 include_directories(

@@ -163,7 +163,7 @@ function rndrSt(stat) {
         tbody.appendChild(row);
         row.appendChild(col1);
         row.appendChild(col2);
-        col1.innerHTML = "<a href=\"https://wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
+        col1.innerHTML = "<a rel=\"noreferrer\" href=\"https://wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
         for (var i = 0; i < stat.attrs[key].length; i++) col2.innerHTML += "<span class='attrval'>" + stat.attrs[key][i] + "</span>" + "<br>";
         attrrows[key] = row;
     }
@@ -263,7 +263,7 @@ function rndrGr(grp) {
         tbody.appendChild(row);
         row.appendChild(col1);
         row.appendChild(col2);
-        col1.innerHTML = "<a href=\"https://wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
+        col1.innerHTML = "<a rel=\"noreferrer\" href=\"https://wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
         for (var i = 0; i < grp.attrs[key].length; i++) col2.innerHTML += "<span class='attrval'>" + grp.attrs[key][i] + "</span>" + "<br>";
         attrrows[key] = row;
     }
@@ -441,7 +441,7 @@ var map = L.map('m', {renderer: L.canvas(), attributionControl: false}).setView(
 
 map.addControl(L.control.attribution({
     position: 'bottomright',
-    prefix: '&copy; <a target="_blank" href="https://ad.cs.uni-freiburg.de">University of Freiburg, Chair of Algorithms and Data Structures</a>'
+    prefix: '&copy; <a rel="noreferrer" target="_blank" href="https://ad.cs.uni-freiburg.de">University of Freiburg, Chair of Algorithms and Data Structures</a>'
 }));
 
 map.on('popupopen', function(e) {
@@ -456,7 +456,7 @@ map.on('popupopen', function(e) {
 
 L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {
     maxZoom: 20,
-    attribution: '&copy; <a target="_blank" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution: '&copy; <a rel="noreferrer" target="_blank" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     opacity: 0.8
 }).addTo(map);
 
