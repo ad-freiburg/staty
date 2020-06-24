@@ -21,7 +21,7 @@ var sgMvRelNew = "Move from relation <a onmouseover='grHl(${oid})' onmouseout='g
 var sgMvRelRel = "Move from relation <a onmouseover='grHl(${oid})' onmouseout='grUnHl(${oid})' href=\"" + osmUrl + "relation/${ooid}\" target=\"_blank\">${ooid}</a> into relation <a onmouseover='grHl(${tid})' onmouseout='grUnHl(${tid})' href=\"" + osmUrl + "relation/${toid}\" target=\"_blank\">${toid}</a>.";
 var sgMvOutRel = "Move out of relation <a onmouseover='grHl(${oid})' onmouseout='grUnHl(${oid})' href=\"" + osmUrl + "relation/${ooid}\" target=\"_blank\">${ooid}</a>";
 var sgFixAttr = "Fix attribute <tt>${attr}</tt>.";
-var sgAddName = "Consider adding a <tt><a target='_blank' href='https://wiki.openstreetmap.org/wiki/Key:name'>name</a></tt> attribute.";
+var sgAddName = "Consider adding a <tt><a target='_blank' href='//wiki.openstreetmap.org/wiki/Key:name'>name</a></tt> attribute.";
 var sgAttrTr = "Attribute <tt>${attr}</tt> seems to be a track/platform number. Use <tt>ref</tt> for this and set <tt>${attr}</tt> to the station name.";
 var sgMergeRel = "Merge parent relation <a onmouseover='grHl(${oid})' onmouseout='grUnHl(${oid})' href=\"" + osmUrl + "relation/${ooid}\" target=\"_blank\">${ooid}</a> with relation <a onmouseover='grHl(${tid})' onmouseout='grUnHl(${tid})' href=\"" + osmUrl + "relation/${toid}\" target=\"_blank\">${toid}</a>, or move them into a new relation <tt>public_transport=stop_area_group</tt>";
 var sgMergeMetaGr = "Move parent relation <a onmouseover='grHl(${oid})' onmouseout='grUnHl(${oid})' href=\"" + osmUrl + "relation/${ooid}\" target=\"_blank\">${ooid}</a> into meta <tt>public_transport=stop_area_group</tt> relation <a onmouseover='mGrHl(${tid})' onmouseout='mGrUnHl(${tid})' href=\"" + osmUrl + "relation/${toid}\" target=\"_blank\">${toid}</a>";
@@ -30,7 +30,7 @@ var suggsMsg = [sgMvOrNew, sgMvOrEx, sgMvRelNew, sgMvRelRel, sgMvOutRel, sgFixAt
 
 // group sugg messages
 var sgGrFixAttr = "Fix attribute <tt>${attr}</tt>.";
-var sgGrAddName = "Consider adding a <tt><a target='_blank' href='https://wiki.openstreetmap.org/wiki/Key:name'>name</a></tt> attribute.";
+var sgGrAddName = "Consider adding a <tt><a target='_blank' href='//wiki.openstreetmap.org/wiki/Key:name'>name</a></tt> attribute.";
 var sgGrAttrTr = "Attribute <tt>${attr}</tt> seems to be a track/platform number. Use <tt>ref</tt> for this and set <tt>${attr}</tt> to the station name.";
 var sgGrMergeRel = "Merge with relation <a onmouseover='grHl(${tid})' onmouseout='grUnHl(${tid})' href=\"" + osmUrl + "relation/${toid}\" target=\"_blank\">${toid}</a>, or move both into a new relation <tt>public_transport=stop_area_group</tt>";
 var sgGrMergeMeta = "Move relation into <tt>public_transport=stop_area_group</tt> relation <a onmouseover='mGrHl(${tid})' onmouseout='mGrUnHl(${tid})' href=\"" + osmUrl + "relation/${toid}\" target=\"_blank\">${toid}</a>";
@@ -52,6 +52,8 @@ function req(id, u, cb) {
     reqs[id].open("GET", u, 1);
     reqs[id].send();
 }
+function aa(e, k, v) {e.setAttribute(k, v)}
+function ap(a, b) {a.appendChild(b)}
 
 function marker(stat, z) {
     if (stat.g.length == 1) {
@@ -136,10 +138,10 @@ function rndrSt(stat) {
     var ident = way ? "Way" : "Node";
 
     var con = $$('div');
-    con.setAttribute("id", "nav")
+    aa(con, "id", "nav")
 
     var suggD = $$('div');
-    suggD.setAttribute("id", "sugg")
+    aa(suggD, "id", "sugg")
 
     con.innerHTML = ident + " <a target='_blank' href='" + osmUrl + ident.toLowerCase()+"/" + osmid + "'>" + osmid + "</a>";
 
@@ -148,22 +150,22 @@ function rndrSt(stat) {
     con.innerHTML += "<a class='ebut' target='_blank' href='" + osmUrl + "edit?" + ident.toLowerCase() + "=" + osmid +"'>&#9998;</a>";
 
     var attrTbl = $$('table');
-    attrTbl.setAttribute("id", "attr-tbl")
-    con.appendChild(attrTbl);
-    con.appendChild(suggD);
+    aa(attrTbl, "id", "attr-tbl")
+    ap(con, attrTbl)
+    ap(con, suggD)
 
     var tbody = $$('tbody');
-    attrTbl.appendChild(tbody);
+    ap(attrTbl, tbody)
 
     for (var key in stat.attrs) {
         var row = $$('tr');
         var col1 = $$('td');
         var col2 = $$('td');
         addCl(col2, "err-wrap");
-        tbody.appendChild(row);
-        row.appendChild(col1);
-        row.appendChild(col2);
-        col1.innerHTML = "<a rel=\"noreferrer\" href=\"https://wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
+        ap(tbody, row)
+        ap(row, col1)
+        ap(row, col2)
+        col1.innerHTML = "<a rel=\"noreferrer\" href=\"//wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
         for (var i = 0; i < stat.attrs[key].length; i++) col2.innerHTML += "<span class='attrval'>" + stat.attrs[key][i] + "</span>" + "<br>";
         attrrows[key] = row;
     }
@@ -189,7 +191,7 @@ function rndrSt(stat) {
             }
         }
         addCl(info, 'attr-err-info');
-        row.childNodes[1].appendChild(info);
+        ap(row.childNodes[1], info)
     }
 
     var suggList = $$('ul');
@@ -198,16 +200,16 @@ function rndrSt(stat) {
         var a = $$('span');
         addCl(a, "sugtit");
         a.innerHTML = "Suggestions";
-        suggD.appendChild(a);
+        ap(suggD, a)
     }
 
-    suggD.appendChild(suggList);
+    ap(suggD, suggList)
 
     for (var i = 0; i < stat.su.length; i++) {
         var sg = stat.su[i];
         var sgDiv = $$('li');        
         sgDiv.innerHTML = tmpl(suggsMsg[sg.type - 1], {"attr" : sg.attr, "tid" : sg.target_gid, "ooid" : sg.orig_osm_rel_id, "toid" : sg.target_osm_rel_id, "oid" : sg.orig_gid});
-        suggList.appendChild(sgDiv);
+        ap(suggList, sgDiv)
     }
 
     L.popup({opacity: 0.8})
@@ -225,20 +227,20 @@ function rndrGr(grp) {
     grHl(grp.id);
 
     var con = $$('div');
-    con.setAttribute("id", "nav");
+    aa(con, "id", "nav")
 
     var newMembers = $$('div');
-    newMembers.setAttribute("id", "group-stations-new")
-    newMembers.innerHTML = "<span class='newmemberstit'>New Members</span>";
+    aa(newMembers, "id", "gsn")
+    newMembers.innerHTML = "<span class='nmt'>New Members</span>";
 
     var oldMembers = $$('div');
-    oldMembers.setAttribute("id", "group-stations-old")
-    oldMembers.innerHTML = "<span class='oldmemberstit'>Existing Members</span>";
+    aa(oldMembers, "id", "gso")
+    oldMembers.innerHTML = "<span class='omt'>Existing Members</span>";
 
     if (grp.osmid == 1) {
         con.innerHTML = "<span class='grouplink'>New relation</span> <tt>public_transport=stop_area</tt>";
     } else {
-        con.innerHTML = "OSM relation <a target='_blank' href='https://www.openstreetmap.org/relation/" + grp.osmid + "'>" + grp.osmid + "</a>";
+        con.innerHTML = "OSM relation <a target='_blank' href='" + osmUrl + "relation/" + grp.osmid + "'>" + grp.osmid + "</a>";
 
         if (grp.attrs.name) con.innerHTML += " (<b>\"" + grp.attrs.name + "\"</b>)";
 
@@ -246,24 +248,24 @@ function rndrGr(grp) {
     }
 
     var attrTbl = $$('table');
-    attrTbl.setAttribute("id", "attr-tbl")
-    con.appendChild(attrTbl);
+    aa(attrTbl, "id", "attr-tbl")
+    ap(con, attrTbl)
 
     var tbody = $$('tbody');
-    attrTbl.appendChild(tbody);
+    ap(attrTbl, tbody)
 
     var suggD = $$('div');
-    suggD.setAttribute("id", "sugg")
+    aa(suggD, "id", "sugg")
 
     for (var key in grp.attrs) {
         var row = $$('tr');
         var col1 = $$('td');
         var col2 = $$('td');
         addCl(col2, "err-wrap");
-        tbody.appendChild(row);
-        row.appendChild(col1);
-        row.appendChild(col2);
-        col1.innerHTML = "<a rel=\"noreferrer\" href=\"https://wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
+        ap(tbody, row)
+        ap(row, col1)
+        ap(row, col2)
+        col1.innerHTML = "<a rel=\"noreferrer\" href=\"//wiki.openstreetmap.org/wiki/Key:" + key + "\" target=\"_blank\"><tt>" + key + "</tt></a>";
         for (var i = 0; i < grp.attrs[key].length; i++) col2.innerHTML += "<span class='attrval'>" + grp.attrs[key][i] + "</span>" + "<br>";
         attrrows[key] = row;
     }
@@ -288,7 +290,7 @@ function rndrGr(grp) {
         }
 
         addCl(info, 'attr-err-info');
-        row.childNodes[1].appendChild(info);
+        ap(row.childNodes[1], info)
     }
 
     var suggList = $$('ul');
@@ -297,10 +299,10 @@ function rndrGr(grp) {
         var a = $$('span');
         addCl(a, "sugtit");
         a.innerHTML = "Suggestions";
-        suggD.appendChild(a);
+        ap(suggD, a)
     }
 
-    suggD.appendChild(suggList);
+    ap(suggD, suggList)
     var mergeGroup = false;
 
     for (var i = 0; i < grp.su.length; i++) {
@@ -310,11 +312,11 @@ function rndrGr(grp) {
         if (sg.type == 9 || sg.type == 10) mergeGroup = true;
 
         sgDiv.innerHTML = tmpl(groupSuggMsg[sg.type - 6], {"attr" : sg.attr, "tid" : sg.target_gid, "ooid" : sg.orig_osm_rel_id, "toid" : sg.target_osm_rel_id, "oid" : sg.orig_gid});
-        suggList.appendChild(sgDiv);
+        ap(suggList, sgDiv)
     }
 
-    con.appendChild(newMembers);
-    if (grp.osmid != 1) con.appendChild(oldMembers);
+    ap(con, newMembers)
+    if (grp.osmid != 1) ap(con, oldMembers)
 
     for (var key in grp.stations) {
         var stat = grp.stations[key];
@@ -327,14 +329,14 @@ function rndrGr(grp) {
 
         row.style.backgroundColor = stat.e ? '#f58d8d' : stat.s ? '#b6b6e4' : '#c0f7c0';
 
-        if (grp.osmid == 1 || stat.orig_group != grp.id) newMembers.appendChild(row);
+        if (grp.osmid == 1 || stat.orig_group != grp.id) ap(newMembers, row)
         else {
-            oldMembers.appendChild(row);
+            ap(oldMembers, row)
             if (stat.group != grp.id && !mergeGroup) addCl(row, "del-stat");
         }
     }
 
-    con.appendChild(suggD);
+    ap(con, suggD)
 
     L.popup({opacity: 0.8})
         .setLatLng(grp)
@@ -348,16 +350,16 @@ function rndrMGr(grp) {
     mGrHl(grp.id);
 
     var con = $$('div');
-    con.setAttribute("id", "nav");
+    aa(con, "id", "nav")
 
     var oldMembers = $$('div');
-    oldMembers.setAttribute("id", "group-stations-old")
-    oldMembers.innerHTML = "<span class='oldmemberstit'>Members</span>";
+    aa(oldMembers, "id", "gso")
+    oldMembers.innerHTML = "<span class='omt'>Members</span>";
 
-    con.innerHTML = "OSM relation <a target='_blank' href='https://www.openstreetmap.org/relation/" + grp.osmid + "'>" + grp.osmid + " </a> (<tt>public_transport=stop_area_group</tt>)";
+    con.innerHTML = "OSM relation <a target='_blank' href='" + osmUrl + "/relation/" + grp.osmid + "'>" + grp.osmid + " </a> (<tt>public_transport=stop_area_group</tt>)";
     con.innerHTML += "<a class='ebut' target='_blank' href='" + osmUrl + "edit?relation=" + grp.osmid +"'>&#9998;</a>";
 
-    con.appendChild(oldMembers);
+    ap(con, oldMembers)
 
     for (var key in grp.groups) {
         var gr = grp.groups[key];
@@ -367,7 +369,7 @@ function rndrMGr(grp) {
         if (gr.attrs.name) row.innerHTML += " (<b>\"" + gr.attrs.name[0] + "\"</b>)";
         row.style.backgroundColor = gr.e ? '#f58d8d' : gr.s ? '#b6b6e4' : '#c0f7c0';
 
-        oldMembers.appendChild(row);
+        ap(oldMembers, row)
     }
 
     L.popup({opacity: 0.8})
@@ -441,7 +443,7 @@ var map = L.map('m', {renderer: L.canvas(), attributionControl: false}).setView(
 
 map.addControl(L.control.attribution({
     position: 'bottomright',
-    prefix: '&copy; <a rel="noreferrer" target="_blank" href="https://ad.cs.uni-freiburg.de">University of Freiburg, Chair of Algorithms and Data Structures</a>'
+    prefix: '<a rel="noreferrer" target="_blank" href="//github.com/ad-freiburg/statsimi">Code on GitHub</a> | &copy; 2020 <a rel="noreferrer" target="_blank" href="//ad.cs.uni-freiburg.de">University of Freiburg, Chair of Algorithms and Data Structures</a>'
 }));
 
 map.on('popupopen', function(e) {
@@ -456,7 +458,7 @@ map.on('popupopen', function(e) {
 
 L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {
     maxZoom: 20,
-    attribution: '&copy; <a rel="noreferrer" target="_blank" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution: '&copy; <a rel="noreferrer" target="_blank" href="' + osmUrl + '/copyright">OpenStreetMap</a>',
     opacity: 0.8
 }).addTo(map);
 
@@ -640,15 +642,15 @@ function s(q) {
                     var dist = $$('span');
                     addCl(dist, "dist");
                     dist.innerHTML = dstr(e.s ? e.s.g : e.g.g);
-                    row.appendChild(dist);
+                    ap(row, dist)
 
                     if (e.v && e.v != e.name) {
                         var via = $$('span');
                         addCl(via, "via");
                         via.innerHTML = e.v;
-                        row.appendChild(via);
+                        ap(row, via)
                     }
-                    res.appendChild(row);
+                    ap(res, row)
                 }
                 if ($('.sres').length > 0) select($('.sres')[0]);
             }
