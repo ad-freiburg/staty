@@ -2225,12 +2225,6 @@
             setStyle: function(t) {
                 return this.invoke("setStyle", t)
             },
-            bringToFront: function() {
-                return this.invoke("bringToFront")
-            },
-            bringToBack: function() {
-                return this.invoke("bringToBack")
-            },
             getBounds: function() {
                 var t = new N;
                 for (var i in this._layers) {
@@ -2499,12 +2493,6 @@
             },
             setStyle: function(t) {
                 return p(this, t), this._renderer && (this._renderer._updateStyle(this), this.options.stroke && t.hasOwnProperty("weight") && this._updateBounds()), this
-            },
-            bringToFront: function() {
-                return this._renderer && this._renderer._bringToFront(this), this
-            },
-            bringToBack: function() {
-                return this._renderer && this._renderer._bringToBack(this), this
             },
             getElement: function() {
                 return this._path
@@ -2885,7 +2873,7 @@
                 p(this, t), this._source = i
             },
             onAdd: function(t) {
-                this._zoomAnimated = t._zoomAnimated, this._container || this._initLayout(), t._fadeAnimated && vi(this._container, 0), clearTimeout(this._removeTimeout), this.getPane().appendChild(this._container), this.update(), t._fadeAnimated && vi(this._container, 1), this.bringToFront()
+                this._zoomAnimated = t._zoomAnimated, this._container || this._initLayout(), t._fadeAnimated && vi(this._container, 0), clearTimeout(this._removeTimeout), this.getPane().appendChild(this._container), this.update(), t._fadeAnimated && vi(this._container, 1)
             },
             onRemove: function(t) {
                 t._fadeAnimated ? (vi(this._container, 0), this._removeTimeout = setTimeout(a(ui, void 0, this._container), 200)) : ui(this._container)
@@ -2917,12 +2905,6 @@
             },
             isOpen: function() {
                 return !!this._map && this._map.hasLayer(this)
-            },
-            bringToFront: function() {
-                return this._map && ci(this._container), this
-            },
-            bringToBack: function() {
-                return this._map && _i(this._container), this
             },
             _prepareOpen: function(t, i, e) {
                 if (i instanceof Se || (e = i, i = t), i instanceof Ee)
@@ -3063,104 +3045,8 @@
         closePopup: function(t) {
             return t && t !== this._popup || (t = this._popup, this._popup = null), t && this.removeLayer(t), this
         }
-    }), Se.include({
-        bindPopup: function(t, i) {
-            return t instanceof nn ? (p(t, i), (this._popup = t)._source = this) : (this._popup && !i || (this._popup = new nn(i, this)), this._popup.setContent(t)), this._popupHandlersAdded || (this.on({
-                click: this._openPopup,
-                keypress: this._onKeyPress,
-                remove: this.closePopup,
-                move: this._movePopup
-            }), this._popupHandlersAdded = !0), this
-        },
-        unbindPopup: function() {
-            return this._popup && (this.off({
-                click: this._openPopup,
-                keypress: this._onKeyPress,
-                remove: this.closePopup,
-                move: this._movePopup
-            }), this._popupHandlersAdded = !1, this._popup = null), this
-        },
-        openPopup: function(t, i) {
-            return this._popup && this._map && (i = this._popup._prepareOpen(this, t, i), this._map.openPopup(this._popup, i)), this
-        },
-        closePopup: function() {
-            return this._popup && this._popup._close(), this
-        },
-        togglePopup: function(t) {
-            return this._popup && (this._popup._map ? this.closePopup() : this.openPopup(t)), this
-        },
-        isPopupOpen: function() {
-            return !!this._popup && this._popup.isOpen()
-        },
-        setPopupContent: function(t) {
-            return this._popup && this._popup.setContent(t), this
-        },
-        getPopup: function() {
-            return this._popup
-        },
-        _openPopup: function(t) {
-            var i = t.layer || t.target;
-            this._popup && this._map && (ji(t), i instanceof Oe ? this.openPopup(t.layer || t.target, t.latlng) : this._map.hasLayer(this._popup) && this._popup._source === i ? this.closePopup() : this.openPopup(i, t.latlng))
-        },
-        _movePopup: function(t) {
-            this._popup.setLatLng(t.latlng)
-        },
-        _onKeyPress: function(t) {
-            13 === t.originalEvent.keyCode && this._openPopup(t)
-        }
-    });
-    
-    Ji.include({
-        openTooltip: function(t, i, e) {
-            return t instanceof on || (t = new on(e).setContent(t)), i && t.setLatLng(i), this.hasLayer(t) ? this : this.addLayer(t)
-        },
-        closeTooltip: function(t) {
-            return t && this.removeLayer(t), this
-        }
-    }), Se.include({
-        bindTooltip: function(t, i) {
-            return t instanceof on ? (p(t, i), (this._tooltip = t)._source = this) : (this._tooltip && !i || (this._tooltip = new on(i, this)), this._tooltip.setContent(t)), this._initTooltipInteractions(), this._tooltip.options.permanent && this._map && this._map.hasLayer(this) && this.openTooltip(), this
-        },
-        unbindTooltip: function() {
-            return this._tooltip && (this._initTooltipInteractions(!0), this.closeTooltip(), this._tooltip = null), this
-        },
-        _initTooltipInteractions: function(t) {
-            if (t || !this._tooltipHandlersAdded) {
-                var i = t ? "off" : "on",
-                    e = {
-                        remove: this.closeTooltip,
-                        move: this._moveTooltip
-                    };
-                this._tooltip.options.permanent ? e.add = this._openTooltip : (e.mouseover = this._openTooltip, e.mouseout = this.closeTooltip, this._tooltip.options.sticky && (e.mousemove = this._moveTooltip), Tt && (e.click = this._openTooltip)), this[i](e), this._tooltipHandlersAdded = !t
-            }
-        },
-        openTooltip: function(t, i) {
-            return this._tooltip && this._map && (i = this._tooltip._prepareOpen(this, t, i), this._map.openTooltip(this._tooltip, i), this._tooltip.options.interactive && this._tooltip._container && (pi(this._tooltip._container, "leaflet-clickable"), this.addInteractiveTarget(this._tooltip._container))), this
-        },
-        closeTooltip: function() {
-            return this._tooltip && (this._tooltip._close(), this._tooltip.options.interactive && this._tooltip._container && (mi(this._tooltip._container, "leaflet-clickable"), this.removeInteractiveTarget(this._tooltip._container))), this
-        },
-        toggleTooltip: function(t) {
-            return this._tooltip && (this._tooltip._map ? this.closeTooltip() : this.openTooltip(t)), this
-        },
-        isTooltipOpen: function() {
-            return this._tooltip.isOpen()
-        },
-        setTooltipContent: function(t) {
-            return this._tooltip && this._tooltip.setContent(t), this
-        },
-        getTooltip: function() {
-            return this._tooltip
-        },
-        _openTooltip: function(t) {
-            var i = t.layer || t.target;
-            this._tooltip && this._map && this.openTooltip(i, this._tooltip.options.sticky ? t.latlng : void 0)
-        },
-        _moveTooltip: function(t) {
-            var i, e, n = t.latlng;
-            this._tooltip.options.sticky && t.originalEvent && (i = this._map.mouseEventToContainerPoint(t.originalEvent), e = this._map.containerPointToLayerPoint(i), n = this._map.layerPointToLatLng(e)), this._tooltip.setLatLng(n)
-        }
-    });
+    });    
+
     ke.Default = Be;
     var rn = Se.extend({
         options: {
@@ -3191,12 +3077,6 @@
         },
         onRemove: function(t) {
             this._removeAllTiles(), ui(this._container), t._removeZoomLimit(this), this._container = null, this._tileZoom = void 0
-        },
-        bringToFront: function() {
-            return this._map && (ci(this._container), this._setAutoZIndex(Math.max)), this
-        },
-        bringToBack: function() {
-            return this._map && (_i(this._container), this._setAutoZIndex(Math.min)), this
         },
         getContainer: function() {
             return this._container
@@ -3799,144 +3679,14 @@
             },
             _fireEvent: function(t, i, e) {
                 this._map._fireDOMEvent(i, e || i.type, t)
-            },
-            _bringToFront: function(t) {
-                var i = t._order;
-                if (i) {
-                    var e = i.next,
-                        n = i.prev;
-                    e && ((e.prev = n) ? n.next = e : e && (this._drawFirst = e), i.prev = this._drawLast, (this._drawLast.next = i).next = null, this._drawLast = i, this._requestRedraw(t))
-                }
-            },
-            _bringToBack: function(t) {
-                var i = t._order;
-                if (i) {
-                    var e = i.next,
-                        n = i.prev;
-                    n && ((n.next = e) ? e.prev = n : n && (this._drawLast = n), i.prev = null, i.next = this._drawFirst, this._drawFirst.prev = i, this._drawFirst = i, this._requestRedraw(t))
-                }
             }
         });
 
     function _n(t) {
         return St ? new cn(t) : null
     }
-    var dn = function() {
-            try {
-                return document.namespaces.add("lvml", "urn:schemas-microsoft-com:vml"),
-                    function(t) {
-                        return document.createElement("<lvml:" + t + ' class="lvml">')
-                    }
-            } catch (t) {
-                return function(t) {
-                    return document.createElement("<" + t + ' xmlns="urn:schemas-microsoft.com:vml" class="lvml">')
-                }
-            }
-        }(),
-        pn = {
-            _initContainer: function() {
-                this._container = hi("div", "leaflet-vml-container")
-            },
-            _update: function() {
-                this._map._animatingZoom || (ln.prototype._update.call(this), this.fire("update"))
-            },
-            _initPath: function(t) {
-                var i = t._container = dn("shape");
-                pi(i, "leaflet-vml-shape " + (this.options.className || "")), i.coordsize = "1 1", t._path = dn("path"), i.appendChild(t._path), this._updateStyle(t), this._layers[u(t)] = t
-            },
-            _addPath: function(t) {
-                var i = t._container;
-                this._container.appendChild(i), t.options.interactive && t.addInteractiveTarget(i)
-            },
-            _removePath: function(t) {
-                var i = t._container;
-                ui(i), t.removeInteractiveTarget(i), delete this._layers[u(t)]
-            },
-            _updateStyle: function(t) {
-                var i = t._stroke,
-                    e = t._fill,
-                    n = t.options,
-                    o = t._container;
-                o.stroked = !!n.stroke, o.filled = !!n.fill, n.stroke ? (i || (i = t._stroke = dn("stroke")), o.appendChild(i), i.weight = n.weight + "px", i.color = n.color, i.opacity = n.opacity, n.dashArray ? i.dashStyle = v(n.dashArray) ? n.dashArray.join(" ") : n.dashArray.replace(/( *, *)/g, " ") : i.dashStyle = "", i.endcap = n.lineCap.replace("butt", "flat"), i.joinstyle = n.lineJoin) : i && (o.removeChild(i), t._stroke = null), n.fill ? (e || (e = t._fill = dn("fill")), o.appendChild(e), e.color = n.fillColor || n.color, e.opacity = n.fillOpacity) : e && (o.removeChild(e), t._fill = null)
-            },
-            _updateCircle: function(t) {
-                var i = t._point.round(),
-                    e = Math.round(t._radius),
-                    n = Math.round(t._radiusY || e);
-                this._setPath(t, t._empty() ? "M0 0" : "AL " + i.x + "," + i.y + " " + e + "," + n + " 0,23592600")
-            },
-            _setPath: function(t, i) {
-                t._path.v = i
-            },
-            _bringToFront: function(t) {
-                ci(t._container)
-            },
-            _bringToBack: function(t) {
-                _i(t._container)
-            }
-        },
-        mn = Et ? dn : $,
-        fn = ln.extend({
-            getEvents: function() {
-                var t = ln.prototype.getEvents.call(this);
-                return t.zoomstart = this._onZoomStart, t
-            },
-            _initContainer: function() {
-                this._container = mn("svg"), this._container.setAttribute("pointer-events", "none"), this._rootGroup = mn("g"), this._container.appendChild(this._rootGroup)
-            },
-            _destroyContainer: function() {
-                ui(this._container), Bi(this._container), delete this._container, delete this._rootGroup, delete this._svgSize
-            },
-            _onZoomStart: function() {
-                this._update()
-            },
-            _update: function() {
-                if (!this._map._animatingZoom || !this._bounds) {
-                    ln.prototype._update.call(this);
-                    var t = this._bounds,
-                        i = t.getSize(),
-                        e = this._container;
-                    this._svgSize && this._svgSize.equals(i) || (this._svgSize = i, e.setAttribute("width", i.x), e.setAttribute("height", i.y)), wi(e, t.min), e.setAttribute("viewBox", [t.min.x, t.min.y, i.x, i.y].join(" ")), this.fire("update")
-                }
-            },
-            _initPath: function(t) {
-                var i = t._path = mn("path");
-                t.options.className && pi(i, t.options.className), t.options.interactive && pi(i, "leaflet-interactive"), this._updateStyle(t), this._layers[u(t)] = t
-            },
-            _addPath: function(t) {
-                this._rootGroup || this._initContainer(), this._rootGroup.appendChild(t._path), t.addInteractiveTarget(t._path)
-            },
-            _removePath: function(t) {
-                ui(t._path), t.removeInteractiveTarget(t._path), delete this._layers[u(t)]
-            },
-            _updatePath: function(t) {
-                t._project(), t._update()
-            },
-            _updateStyle: function(t) {
-                var i = t._path,
-                    e = t.options;
-                i && (e.stroke ? (i.setAttribute("stroke", e.color), i.setAttribute("stroke-opacity", e.opacity), i.setAttribute("stroke-width", e.weight), i.setAttribute("stroke-linecap", e.lineCap), i.setAttribute("stroke-linejoin", e.lineJoin), e.dashArray ? i.setAttribute("stroke-dasharray", e.dashArray) : i.removeAttribute("stroke-dasharray"), e.dashOffset ? i.setAttribute("stroke-dashoffset", e.dashOffset) : i.removeAttribute("stroke-dashoffset")) : i.setAttribute("stroke", "none"), e.fill ? (i.setAttribute("fill", e.fillColor || e.color), i.setAttribute("fill-opacity", e.fillOpacity), i.setAttribute("fill-rule", e.fillRule || "evenodd")) : i.setAttribute("fill", "none"))
-            },
-            _updatePoly: function(t, i) {
-                this._setPath(t, Q(t._parts, i))
-            },
-            _updateCircle: function(t) {
-                var i = t._point,
-                    e = Math.max(Math.round(t._radius), 1),
-                    n = "a" + e + "," + (Math.max(Math.round(t._radiusY), 1) || e) + " 0 1,0 ",
-                    o = t._empty() ? "M0 0" : "M" + (i.x - e) + "," + i.y + n + 2 * e + ",0 " + n + 2 * -e + ",0 ";
-                this._setPath(t, o)
-            },
-            _setPath: function(t, i) {
-                t._path.setAttribute("d", i)
-            },
-            _bringToFront: function(t) {
-                ci(t._path)
-            },
-            _bringToBack: function(t) {
-                _i(t._path)
-            }
-        });
+    mn = $,
+    fn = ln.extend({});
 
     function gn(t) {
         return Zt || Et ? new fn(t) : null
