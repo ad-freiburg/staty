@@ -37,7 +37,7 @@ var sgGrMergeMeta = "Move relation into <tt>public_transport=stop_area_group</tt
 
 var groupSuggMsg = [sgGrFixAttr, sgGrAddName, sgGrAttrTr, sgGrMergeRel, sgGrMergeMeta];
 
-function $(a){return a[0] == "#" ? document.getElementById(a.substr(1)) : a[0] == "." ? document.getElementsByClassName(a.substr(1)) : document.getElementsByTagName(a)}
+function $(a){return document.querySelectorAll(a)}
 function $$(t){return document.createElement(t) }
 function ll(g){return {"lat" : g[0], "lng" : g[1]}}
 function hasCl(e, c){return e.className.split(" ").indexOf(c) != -1}
