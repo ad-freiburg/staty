@@ -55,6 +55,8 @@ function req(id, u, cb) {
 function aa(e, k, v) {e.setAttribute(k, v)}
 function ap(a, b) {a.appendChild(b)}
 
+function rz() { return Math.round(map.getZoom())}
+
 function marker(stat, z) {
     if (stat.g.length == 1) {
         if (z > 15) {
@@ -412,7 +414,7 @@ function grUnHl(id) {
 function stHl(id) {
     if (!stIdx[id]) return;
 
-    if (map.getZoom() > 15) {
+    if (rz() > 15) {
         stIdx[id].setStyle({
             'weight': 5,
             'color': "#eecc00"
@@ -427,9 +429,9 @@ function stHl(id) {
 function stUnHl(id) {
     if (!stIdx[id]) return;
 
-    if (map.getZoom() > 15) {
+    if (rz() > 15) {
         stIdx[id].setStyle({
-            'weight': map.getZoom() > 17 ? 1.5 : 1,
+            'weight': rz() > 17 ? 1.5 : 1,
             'color': "#000"
         });
     } else {
@@ -466,19 +468,19 @@ var l = L.featureGroup().addTo(map);
 
 map.on("moveend", function() {render();});
 map.on("click", function() {s()});
-map.on("zoomend", function() {$("main")[0].className = '';addCl($("main")[0], "z"+map.getZoom())});
+map.on("zoomend", function() {$("main")[0].className = '';addCl($("main")[0], "z"+rz())});
 
 function render() {
-    if (map.getZoom() < 11) {
+    if (rz() < 11) {
         var b = map.getBounds();
         var sw = b.getSouthWest();
         var ne = b.getNorthEast();
-        req("m", "/heatmap?z=" + map.getZoom() + "&bbox=" + [sw.lat, sw.lng, ne.lat, ne.lng].join(","),
+        req("m", "/heatmap?z=" + rz() + "&bbox=" + [sw.lat, sw.lng, ne.lat, ne.lng].join(","),
             function(re) {
                 l.clearLayers();
 
-                var blur = 22 - map.getZoom();
-                var rad = 25 - map.getZoom();
+                var blur = 22 - rz();
+                var rad = 25 - rz();
 
                 l.addLayer(L.heatLayer(re.ok, {
                     max: 500,
@@ -517,7 +519,7 @@ function render() {
             }
         )
     } else {
-        req("m", "/map?z=" + map.getZoom() + "&bbox=" + [map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng].join(","),
+        req("m", "/map?z=" + rz() + "&bbox=" + [map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng].join(","),
             function(re) {
                 l.clearLayers();
                 grIdx = {};
@@ -526,25 +528,25 @@ function render() {
 
                 var stats = [];
                 for (var i = 0; i < re.stats.length; i++) {
-                    stIdx[re.stats[i].i] = stats[stats.push(marker(re.stats[i], map.getZoom())) - 1];
+                    stIdx[re.stats[i].i] = stats[stats.push(marker(re.stats[i], rz())) - 1];
                 }
 
                 var groups = [];
                 for (var i = 0; i < re.groups.length; i++) {
-                    grIdx[re.groups[i].i] = groups[groups.push(poly(re.groups[i], map.getZoom())) - 1];
+                    grIdx[re.groups[i].i] = groups[groups.push(poly(re.groups[i], rz())) - 1];
                 }
 
                 var mgroups = [];
                 for (var i = 0; i < re.mgroups.length; i++) {
-                    mGrIdx[re.mgroups[i].i] = mgroups[mgroups.push(poly(re.mgroups[i], map.getZoom(), 1)) - 1];
+                    mGrIdx[re.mgroups[i].i] = mgroups[mgroups.push(poly(re.mgroups[i], rz(), 1)) - 1];
                 }
 
                 var suggs = [];
                 for (var i = 0; i < re.su.length; i++) {
-                    suggs.push(sugArr(re.su[i], map.getZoom()));
+                    suggs.push(sugArr(re.su[i], rz()));
                 }
 
-                if (map.getZoom() > 13) {
+                if (rz() > 13) {
                     l.addLayer(L.featureGroup(mgroups).on('click', function(a) {
                         openMGr(a.layer.options.id, a.layer.getBounds().getCenter());
                     }));
@@ -557,7 +559,7 @@ function render() {
                     openSt(a.layer.options.id);
                 }));
 
-                if (map.getZoom() > 15) {
+                if (rz() > 15) {
                     l.addLayer(L.featureGroup(suggs).on('click', function(a) {
                         if (a.layer.options.id < 0) openGr(-a.layer.options.id);
                         else openSt(a.layer.options.id);
