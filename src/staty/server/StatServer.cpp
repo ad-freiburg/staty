@@ -633,20 +633,24 @@ util::http::Answer StatServer::handleGroupReq(const Params& pars) const {
     json << sep;
     sep = ',';
     json << "{";
-    json << "\"attr\":[\"" << err.attr << "\",\""
-         << group->attrs.at(err.attr)[0] << "\"]";
+    json << "\"attr\":[\"" << util::jsonStringEscape(err.attr) << "\",\""
+         << util::jsonStringEscape(group->attrs.at(err.attr)[0]) << "\"]";
     json << ",\"conf\":" << err.conf;
 
     if (err.fromRel) {
       const auto otherGroup = idx.getGroup(err.otherId);
-      json << ",\"other_attr\":[\"" << err.otherAttr << "\",\""
-           << otherGroup->attrs.at(err.otherAttr)[0] << "\"]";
+      json << ",\"other_attr\":[\"" << util::jsonStringEscape(err.otherAttr)
+           << "\",\""
+           << util::jsonStringEscape(otherGroup->attrs.at(err.otherAttr)[0])
+           << "\"]";
       json << ",\"other_grp\":" << err.otherId + range.gidStart;
       json << ",\"other_osmid\":" << otherGroup->osmid;
     } else {
       const auto otherStat = idx.getStation(err.otherId);
-      json << ",\"other_attr\":[\"" << err.otherAttr << "\",\""
-           << otherStat->attrs.at(err.otherAttr)[0] << "\"]";
+      json << ",\"other_attr\":[\"" << util::jsonStringEscape(err.otherAttr)
+           << "\",\""
+           << util::jsonStringEscape(otherStat->attrs.at(err.otherAttr)[0])
+           << "\"]";
       json << ",\"other\":" << err.otherId + range.sidStart;
       json << ",\"other_osmid\":" << otherStat->osmid;
     }
@@ -699,12 +703,14 @@ util::http::Answer StatServer::handleGroupReq(const Params& pars) const {
   for (size_t sid : group->suggestions) {
     const auto* sugg = idx.getSuggestion(sid);
     if (sugg->type == 6) {
-      json << seper << "{\"type\":6,\"attr\":\"" << sugg->attrErrName << "\""
+      json << seper << "{\"type\":6,\"attr\":\""
+           << util::jsonStringEscape(sugg->attrErrName) << "\""
            << "}";
     } else if (sugg->type == 7) {
       json << seper << "{\"type\":7}";
     } else if (sugg->type == 8) {
-      json << seper << "{\"type\":8,\"attr\":\"" << sugg->attrErrName << "\""
+      json << seper << "{\"type\":8,\"attr\":\""
+           << util::jsonStringEscape(sugg->attrErrName) << "\""
            << "}";
     } else if (sugg->type == 9) {
       json << seper << "{\"type\":9,\"target_gid\":"
@@ -789,20 +795,24 @@ util::http::Answer StatServer::handleStatReq(const Params& pars) const {
     json << sep;
     sep = ',';
     json << "{";
-    json << "\"attr\":[\"" << err.attr << "\",\"" << stat->attrs.at(err.attr)[0]
-         << "\"]";
+    json << "\"attr\":[\"" << util::jsonStringEscape(err.attr) << "\",\""
+         << util::jsonStringEscape(stat->attrs.at(err.attr)[0]) << "\"]";
     json << ",\"conf\":" << err.conf;
 
     if (err.fromRel) {
       const auto otherGroup = idx.getGroup(err.otherId);
-      json << ",\"other_attr\":[\"" << err.otherAttr << "\",\""
-           << otherGroup->attrs.at(err.otherAttr)[0] << "\"]";
+      json << ",\"other_attr\":[\"" << util::jsonStringEscape(err.otherAttr)
+           << "\",\""
+           << util::jsonStringEscape(otherGroup->attrs.at(err.otherAttr)[0])
+           << "\"]";
       json << ",\"other_grp\":" << err.otherId + range.gidStart;
       json << ",\"other_osmid\":" << otherGroup->osmid;
     } else {
       const auto otherStat = idx.getStation(err.otherId);
-      json << ",\"other_attr\":[\"" << err.otherAttr << "\",\""
-           << otherStat->attrs.at(err.otherAttr)[0] << "\"]";
+      json << ",\"other_attr\":[\"" << util::jsonStringEscape(err.otherAttr)
+           << "\",\""
+           << util::jsonStringEscape(otherStat->attrs.at(err.otherAttr)[0])
+           << "\"]";
       json << ",\"other\":" << err.otherId + range.sidStart;
       json << ",\"other_osmid\":" << otherStat->osmid;
     }
