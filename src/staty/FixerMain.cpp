@@ -77,6 +77,6 @@ int main(int argc, char** argv) {
   StatServer serv(idx, searchIdx);
 
   LOG(INFO) << "Listening on port " << port;
-  util::http::HttpServer(port, &serv).run();
+  util::http::HttpServer(port, &serv, std::thread::hardware_concurrency()).run();
 }
 
