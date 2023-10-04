@@ -458,10 +458,10 @@ map.on('popupopen', function(e) {
     s();
 });
 
-L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png  ', {
     maxZoom: 20,
     attribution: '&copy; <a rel="noreferrer" target="_blank" href="' + osmUrl + '/copyright">OpenStreetMap</a>',
-    opacity: 0.8
+    opacity: 0.7
 }).addTo(map);
 
 var l = L.featureGroup().addTo(map);
