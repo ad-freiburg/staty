@@ -10,6 +10,7 @@
 #include <math.h>
 #include <algorithm>
 #include <cassert>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -51,7 +52,10 @@ typedef Polygon<int> IPolygon;
 
 const static double EPSILON = 0.00001;
 const static double RAD = 0.017453292519943295;  // PI/180
+const static double IRAD = 180.0 / M_PI;         // 180 / PI
 const static double AVERAGING_STEP = 20;
+
+const static double M_PER_DEG = 111319.4;
 
 // _____________________________________________________________________________
 template <typename T>
@@ -740,6 +744,19 @@ inline double angBetween(const Point<T>& p1, const Point<T>& q1) {
 }
 
 // _____________________________________________________________________________
+template <typename T>
+inline double angBetween(const Point<T>& p1, const MultiPoint<T>& points) {
+  double sinSum = 0;
+  double cosSum = 0;
+  for (auto q1 : points) {
+    double a = angBetween(p1.getX(), p1.getY(), q1.getX(), q1.getY());
+    sinSum += sin(a);
+    cosSum += cos(a);
+  }
+  return atan2(sinSum / points.size(), cosSum / points.size());
+}
+
+// _____________________________________________________________________________
 inline double dist(double x1, double y1, double x2, double y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
@@ -856,7 +873,7 @@ inline double innerProd(double x1, double y1, double x2, double y2, double x3,
   double m13 = sqrt(dx31 * dx31 + dy31 * dy31);
   double theta = acos(std::min((dx21 * dx31 + dy21 * dy31) / (m12 * m13), 1.0));
 
-  return theta * (180 / M_PI);
+  return theta * IRAD;
 }
 
 // _____________________________________________________________________________
@@ -929,9 +946,8 @@ inline Line<T> lineFromWKT(std::string wkt) {
 // _____________________________________________________________________________
 template <typename T>
 inline std::string getWKT(const Point<T>& p) {
-  std::stringstream ss;
-  ss << "POINT (" << p.getX() << " " << p.getY() << ")";
-  return ss.str();
+  return std::string("POINT (") + formatFloat(p.getX(), 6) + " " +
+         formatFloat(p.getY(), 6) + ")";
 }
 
 // _____________________________________________________________________________
@@ -941,7 +957,8 @@ inline std::string getWKT(const std::vector<Point<T>>& p) {
   ss << "MULTIPOINT (";
   for (size_t i = 0; i < p.size(); i++) {
     if (i) ss << ", ";
-    ss << "(" << p[i].getX() << " " << p[i].getY() << ")";
+    ss << "(" << formatFloat(p.getX(), 6) << " " << formatFloat(p.getY(), 6)
+       << ")";
   }
   ss << ")";
   return ss.str();
@@ -954,7 +971,7 @@ inline std::string getWKT(const Line<T>& l) {
   ss << "LINESTRING (";
   for (size_t i = 0; i < l.size(); i++) {
     if (i) ss << ", ";
-    ss << l[i].getX() << " " << l[i].getY();
+    ss << formatFloat(l[i].getX(), 6) << " " << formatFloat(l[i].getY(), 6);
   }
   ss << ")";
   return ss.str();
@@ -971,7 +988,8 @@ inline std::string getWKT(const std::vector<Line<T>>& ls) {
     ss << "(";
     for (size_t i = 0; i < ls[j].size(); i++) {
       if (i) ss << ", ";
-      ss << ls[j][i].getX() << " " << ls[j][i].getY();
+      ss << formatFloat(ls[j][i].getX(), 6) << " "
+         << formatFloat(ls[j][i].getY(), 6);
     }
     ss << ")";
   }
@@ -991,11 +1009,16 @@ template <typename T>
 inline std::string getWKT(const Box<T>& l) {
   std::stringstream ss;
   ss << "POLYGON ((";
-  ss << l.getLowerLeft().getX() << " " << l.getLowerLeft().getY();
-  ss << ", " << l.getUpperRight().getX() << " " << l.getLowerLeft().getY();
-  ss << ", " << l.getUpperRight().getX() << " " << l.getUpperRight().getY();
-  ss << ", " << l.getLowerLeft().getX() << " " << l.getUpperRight().getY();
-  ss << ", " << l.getLowerLeft().getX() << " " << l.getLowerLeft().getY();
+  ss << formatFloat(l.getLowerLeft().getX(), 6) << " "
+     << formatFloat(l.getLowerLeft().getY(), 6);
+  ss << ", " << formatFloat(l.getUpperRight().getX(), 6) << " "
+     << formatFloat(l.getLowerLeft().getY(), 6);
+  ss << ", " << formatFloat(l.getUpperRight().getX(), 6) << " "
+     << formatFloat(l.getUpperRight().getY(), 6);
+  ss << ", " << formatFloat(l.getLowerLeft().getX(), 6) << " "
+     << formatFloat(l.getUpperRight().getY(), 6);
+  ss << ", " << formatFloat(l.getLowerLeft().getX(), 6) << " "
+     << formatFloat(l.getLowerLeft().getY(), 6);
   ss << "))";
   return ss.str();
 }
@@ -1006,9 +1029,11 @@ inline std::string getWKT(const Polygon<T>& p) {
   std::stringstream ss;
   ss << "POLYGON ((";
   for (size_t i = 0; i < p.getOuter().size(); i++) {
-    ss << p.getOuter()[i].getX() << " " << p.getOuter()[i].getY() << ", ";
+    ss << formatFloat(p.getOuter()[i].getX(), 6) << " "
+       << formatFloat(p.getOuter()[i].getY(), 6) << ", ";
   }
-  ss << p.getOuter().front().getX() << " " << p.getOuter().front().getY();
+  ss << formatFloat(p.getOuter().front().getX(), 6) << " "
+     << formatFloat(p.getOuter().front().getY(), 6);
   ss << "))";
   return ss.str();
 }
@@ -1023,11 +1048,11 @@ inline std::string getWKT(const std::vector<Polygon<T>>& ls) {
     if (j) ss << ", ";
     ss << "((";
     for (size_t i = 0; i < ls[j].getOuter().size(); i++) {
-      ss << ls[j].getOuter()[i].getX() << " " << ls[j].getOuter()[i].getY()
-         << ", ";
+      ss << formatFloat(ls[j].getOuter()[i].getX(), 6) << " "
+         << formatFloat(ls[j].getOuter()[i].getY(), 6) << ", ";
     }
-    ss << ls[j].getOuter().front().getX() << " "
-       << ls[j].getOuter().front().getY();
+    ss << formatFloat(ls[j].getOuter().front().getX(), 6) << " "
+       << formatFloat(ls[j].getOuter().front().getY(), 6);
     ss << "))";
   }
 
@@ -1221,7 +1246,8 @@ inline double parallelity(const Box<T>& box, const MultiLine<T>& multiline) {
 
 // _____________________________________________________________________________
 template <template <typename> class Geometry, typename T>
-inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
+inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol,
+                                         double step) {
   // TODO: implement this nicer, works for now, but inefficient
   // see
   // https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
@@ -1232,8 +1258,8 @@ inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
   double rotateDeg = 0;
 
   // rotate in 1 deg steps
-  for (int i = 1; i < 360; i += 1) {
-    pol = rotate(pol, 1, center);
+  for (double i = step; i < 360; i += step) {
+    pol = rotate(pol, step, center);
     Box<T> e = getBoundingBox(pol);
     if (area(tmpBox) > area(e)) {
       tmpBox = e;
@@ -1242,6 +1268,50 @@ inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
   }
 
   return RotatedBox<T>(tmpBox, -rotateDeg, center);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol) {
+  return getOrientedEnvelope(pol, 1);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol, double step) {
+  std::vector<Geometry<T>> mult{pol};
+  return getOrientedEnvelope(mult, step);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
+  std::vector<Geometry<T>> mult{pol};
+  return getOrientedEnvelope(mult, 1);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline Polygon<T> buffer(const Line<T>& line, double d, size_t points) {
+  // so far only works correctly if the input polygon is convex
+  MultiPoint<T> pSet;
+  for (const auto& p : line) {
+    Point<T> anchor{p.getX() + d, p.getY()};
+    double deg = 0;
+    pSet.push_back(p);
+    for (size_t i = 0; i < points; i++) {
+      pSet.push_back(rotate(anchor, deg, p));
+      deg += 360 / (1.0 * points);
+    }
+  }
+
+  return convexHull(pSet);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline Polygon<T> buffer(const Polygon<T>& pol, double d, size_t points) {
+  return buffer(pol.getOuter(), d, points);
 }
 
 // _____________________________________________________________________________
@@ -1306,6 +1376,22 @@ inline Box<T> getBoundingBox(const std::vector<Geometry<T>>& multigeo) {
   Box<T> b;
   b = extendBox(multigeo, b);
   return b;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline Box<T> getBoundingRect(const Box<T>& b) {
+  auto box = Box<T>();
+  auto centroid = util::geo::centroid(b);
+  box = extendBox(b, box);
+  box = extendBox(rotate(convexHull(b), 180, centroid), box);
+  return box;
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline Box<T> getBoundingRect(const Geometry<T> geom) {
+  return getBoundingRect<T>(getBoundingBox<T>(geom));
 }
 
 // _____________________________________________________________________________
@@ -1760,6 +1846,28 @@ inline RotatedBox<T> getOrientedEnvelopeAvg(MultiLine<T> ml) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline double haversine(T lat1, T lon1, T lat2, T lon2) {
+  lat1 *= RAD;
+  lat2 *= RAD;
+
+  const double dLat = lat2 - lat1;
+  const double dLon = (lon2 - lon1) * RAD;
+
+  const double sDLat = sin(dLat / 2);
+  const double sDLon = sin(dLon / 2);
+
+  const double a = (sDLat * sDLat) + (sDLon * sDLon) * cos(lat1) * cos(lat2);
+  return 6378137.0 * 2.0 * asin(sqrt(a));
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double haversine(const Point<T>& a, const Point<T>& b) {
+  return haversine(a.getY(), a.getX(), b.getY(), b.getX());
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline Line<T> densify(const Line<T>& l, double d) {
   if (!l.size()) return l;
 
@@ -1787,28 +1895,30 @@ inline Line<T> densify(const Line<T>& l, double d) {
 // _____________________________________________________________________________
 template <typename T>
 inline double frechetDistC(size_t i, size_t j, const Line<T>& p,
-                           const Line<T>& q,
-                           std::vector<std::vector<double>>& ca) {
+                           const Line<T>& q, std::vector<float>& ca) {
   // based on Eiter / Mannila
   // http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
 
-  if (ca[i][j] > -1)
-    return ca[i][j];
+  if (ca[i * q.size() + j] > -1)
+    return ca[i * q.size() + j];
   else if (i == 0 && j == 0)
-    ca[i][j] = dist(p[0], q[0]);
+    ca[i * q.size() + j] = dist(p[0], q[0]);
   else if (i > 0 && j == 0)
-    ca[i][j] = std::max(frechetDistC(i - 1, 0, p, q, ca), dist(p[i], q[0]));
+    ca[i * q.size() + j] =
+        std::max(frechetDistC(i - 1, 0, p, q, ca), dist(p[i], q[0]));
   else if (i == 0 && j > 0)
-    ca[i][j] = std::max(frechetDistC(0, j - 1, p, q, ca), dist(p[0], q[j]));
+    ca[i * q.size() + j] =
+        std::max(frechetDistC(0, j - 1, p, q, ca), dist(p[0], q[j]));
   else if (i > 0 && j > 0)
-    ca[i][j] = std::max(std::min(std::min(frechetDistC(i - 1, j, p, q, ca),
-                                          frechetDistC(i - 1, j - 1, p, q, ca)),
-                                 frechetDistC(i, j - 1, p, q, ca)),
-                        dist(p[i], q[j]));
+    ca[i * q.size() + j] =
+        std::max(std::min(std::min(frechetDistC(i - 1, j, p, q, ca),
+                                   frechetDistC(i - 1, j - 1, p, q, ca)),
+                          frechetDistC(i, j - 1, p, q, ca)),
+                 dist(p[i], q[j]));
   else
-    ca[i][j] = std::numeric_limits<double>::infinity();
+    ca[i * q.size() + j] = std::numeric_limits<float>::infinity();
 
-  return ca[i][j];
+  return ca[i * q.size() + j];
 }
 
 // _____________________________________________________________________________
@@ -1817,11 +1927,10 @@ inline double frechetDist(const Line<T>& a, const Line<T>& b, double d) {
   // based on Eiter / Mannila
   // http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
 
-  auto p = densify(a, d);
-  auto q = densify(b, d);
+  const auto& p = densify(a, d);
+  const auto& q = densify(b, d);
 
-  std::vector<std::vector<double>> ca(p.size(),
-                                      std::vector<double>(q.size(), -1.0));
+  std::vector<float> ca(p.size() * q.size(), -1.0);
   double fd = frechetDistC(p.size() - 1, q.size() - 1, p, q, ca);
 
   return fd;
@@ -1830,27 +1939,106 @@ inline double frechetDist(const Line<T>& a, const Line<T>& b, double d) {
 // _____________________________________________________________________________
 template <typename T>
 inline double accFrechetDistC(const Line<T>& a, const Line<T>& b, double d) {
-  auto p = densify(a, d);
-  auto q = densify(b, d);
+  const auto& p = densify(a, d);
+  const auto& q = densify(b, d);
 
-  std::vector<std::vector<double>> ca(p.size(),
-                                      std::vector<double>(q.size(), 0));
+  assert(p.size());
+  assert(q.size());
+
+  std::vector<float> ca(p.size() * q.size(), 0);
 
   for (size_t i = 0; i < p.size(); i++)
-    ca[i][0] = std::numeric_limits<double>::infinity();
+    ca[i * q.size() + 0] = std::numeric_limits<float>::infinity();
   for (size_t j = 0; j < q.size(); j++)
-    ca[0][j] = std::numeric_limits<double>::infinity();
-  ca[0][0] = 0;
+    ca[j] = std::numeric_limits<float>::infinity();
+  ca[0] = 0;
 
   for (size_t i = 1; i < p.size(); i++) {
     for (size_t j = 1; j < q.size(); j++) {
-      double d = util::geo::dist(p[i], q[j]) * util::geo::dist(p[i], p[i - 1]);
-      ca[i][j] =
-          d + std::min(ca[i - 1][j], std::min(ca[i][j - 1], ca[i - 1][j - 1]));
+      float d = util::geo::dist(p[i], q[j]) * util::geo::dist(p[i], p[i - 1]);
+      ca[i * q.size() + j] =
+          d + std::min(ca[(i - 1) * q.size() + j],
+                       std::min(ca[i * q.size() + (j - 1)],
+                                ca[(i - 1) * q.size() + (j - 1)]));
     }
   }
 
-  return ca[p.size() - 1][q.size() - 1];
+  return ca[p.size() * q.size() - 1];
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double frechetDistCHav(size_t i, size_t j, const Line<T>& p,
+                              const Line<T>& q, std::vector<float>& ca) {
+  // based on Eiter / Mannila
+  // http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
+
+  if (ca[i * q.size() + j] > -1)
+    return ca[i * q.size() + j];
+  else if (i == 0 && j == 0)
+    ca[i * q.size() + j] = haversine(p[0], q[0]);
+  else if (i > 0 && j == 0)
+    ca[i * q.size() + j] =
+        std::max(frechetDistCHav(i - 1, 0, p, q, ca), haversine(p[i], q[0]));
+  else if (i == 0 && j > 0)
+    ca[i * q.size() + j] =
+        std::max(frechetDistCHav(0, j - 1, p, q, ca), haversine(p[0], q[j]));
+  else if (i > 0 && j > 0)
+    ca[i * q.size() + j] =
+        std::max(std::min(std::min(frechetDistCHav(i - 1, j, p, q, ca),
+                                   frechetDistCHav(i - 1, j - 1, p, q, ca)),
+                          frechetDistCHav(i, j - 1, p, q, ca)),
+                 haversine(p[i], q[j]));
+  else
+    ca[i * q.size() + j] = std::numeric_limits<float>::infinity();
+
+  return ca[i * q.size() + j];
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double frechetDistHav(const Line<T>& a, const Line<T>& b, double d) {
+  // based on Eiter / Mannila
+  // http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
+
+  const auto& p = densify(a, d);
+  const auto& q = densify(b, d);
+
+  std::vector<float> ca(p.size() * q.size(), -1.0);
+  double fd = frechetDistCHav(p.size() - 1, q.size() - 1, p, q, ca);
+
+  return fd;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double accFrechetDistCHav(const Line<T>& a, const Line<T>& b, double d) {
+  const auto& p = densify(a, d);
+  const auto& q = densify(b, d);
+
+  assert(p.size());
+  assert(q.size());
+
+  std::vector<float> ca(p.size() * q.size(), 0);
+
+  for (size_t i = 0; i < p.size(); i++)
+    ca[i * q.size() + 0] = std::numeric_limits<float>::infinity();
+  for (size_t j = 0; j < q.size(); j++)
+    ca[j] = std::numeric_limits<float>::infinity();
+  ca[0] = 0;
+
+  for (size_t i = 1; i < p.size(); i++) {
+    for (size_t j = 1; j < q.size(); j++) {
+      float d = util::geo::haversine(p[i], q[j]) *
+                util::geo::haversine(p[i], p[i - 1]);
+      ca[i * q.size() + j] =
+          d + std::min(ca[(i - 1) * q.size() + j],
+                       std::min(ca[i * q.size() + (j - 1)],
+                                ca[(i - 1) * q.size() + (j - 1)]));
+    }
+  }
+
+  return ca[p.size() * q.size() - 1];
 }
 
 // _____________________________________________________________________________
@@ -1865,23 +2053,26 @@ inline Point<T> latLngToWebMerc(double lat, double lng) {
 
 // _____________________________________________________________________________
 template <typename T>
+// TODO: rename to lngLat
+inline Point<T> latLngToWebMerc(Point<T> lngLat) {
+  return latLngToWebMerc<T>(lngLat.getY(), lngLat.getX());
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline Point<T> webMercToLatLng(double x, double y) {
-  double lat =
-      (1.5707963267948966 - (2.0 * atan(exp(-y / 6378137.0)))) * (180.0 / M_PI);
-  double lon = x / 111319.4907932735677;
+  const double lat =
+      (1.5707963267948966 - (2.0 * atan(exp(-y / 6378137.0)))) * IRAD;
+  const double lon = x / 111319.4907932735677;
   return Point<T>(lon, lat);
 }
 
 // _____________________________________________________________________________
 template <typename T>
 inline double webMercMeterDist(const Point<T>& a, const Point<T>& b) {
-  // euclidean distance on web mercator is in meters on equator,
-  // and proportional to cos(lat) in both y directions
-
-  double latA = 2 * atan(exp(a.getY() / 6378137.0)) - 1.5707965;
-  double latB = 2 * atan(exp(b.getY() / 6378137.0)) - 1.5707965;
-
-  return util::geo::dist(a, b) * cos((latA + latB) / 2.0);
+  const auto llA = webMercToLatLng<T>(a.getX(), a.getY());
+  const auto llB = webMercToLatLng<T>(b.getX(), b.getY());
+  return haversine(llA.getY(), llA.getX(), llB.getY(), llB.getX());
 }
 
 // _____________________________________________________________________________
@@ -1889,6 +2080,8 @@ template <typename G1, typename G2>
 inline double webMercMeterDist(const G1& a, const G2& b) {
   // euclidean distance on web mercator is in meters on equator,
   // and proportional to cos(lat) in both y directions
+
+  // this is just an approximation
 
   auto pa = centroid(a);
   auto pb = centroid(b);
@@ -1908,6 +2101,14 @@ inline double webMercLen(const Line<T>& g) {
 }
 
 // _____________________________________________________________________________
+template <typename T>
+inline double latLngLen(const Line<T>& g) {
+  double ret = 0;
+  for (size_t i = 1; i < g.size(); i++) ret += haversine(g[i - 1], g[i]);
+  return ret;
+}
+
+// _____________________________________________________________________________
 template <typename G>
 inline double webMercDistFactor(const G& a) {
   // euclidean distance on web mercator is in meters on equator,
@@ -1916,6 +2117,16 @@ inline double webMercDistFactor(const G& a) {
   double lat = 2 * atan(exp(a.getY() / 6378137.0)) - 1.5707965;
   return cos(lat);
 }
+
+// _____________________________________________________________________________
+template <typename G>
+inline double latLngDistFactor(const G& a) {
+  // euclidean distance on web mercator is in meters on equator,
+  // and proportional to cos(lat) in both y directions
+
+  return cos(a.getY() * RAD);
+}
+
 }  // namespace geo
 }  // namespace util
 

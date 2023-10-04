@@ -52,10 +52,10 @@ util::http::Answer StatServer::handle(const util::http::Req& req,
     } else {
       a = util::http::Answer("404 Not Found", "dunno");
     }
-  } catch (std::runtime_error e) {
-    a = util::http::Answer("400 Bad Request", e.what());
-  } catch (std::invalid_argument e) {
-    a = util::http::Answer("400 Bad Request", e.what());
+  } catch (std::runtime_error* e) {
+    a = util::http::Answer("400 Bad Request", e->what());
+  } catch (std::invalid_argument* e) {
+    a = util::http::Answer("400 Bad Request", e->what());
   } catch (...) {
     a = util::http::Answer("500 Internal Server Error",
                            "Internal Server Error.");
@@ -321,6 +321,7 @@ void StatServer::printSugg(const Suggestion* sugg, size_t did,
 // _____________________________________________________________________________
 void StatServer::printMetaGroup(const MetaGroup* mg, size_t did, bool simple,
                                 std::ostream* out) const {
+  UNUSED(did);
   (*out) << "{\"i\":" << mg->osmid << ",\"g\":[";
   char sep = ' ';
   if (simple) {

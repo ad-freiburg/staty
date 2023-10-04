@@ -9,6 +9,7 @@
 #include <set>
 #include <vector>
 #include "util/geo/Geo.h"
+#include "util/geo/output/GeoJsonOutput.h"
 
 namespace util {
 namespace geo {
@@ -42,6 +43,7 @@ struct CapaSplitFunc : SplitFunc<V, T> {
   CapaSplitFunc(size_t c) : _c(c) {}
   virtual bool operator()(const QuadNode<T>& nd,
                        const QuadValue<V, T>& newVal) const {
+    UNUSED(newVal);
     return static_cast<size_t>(nd.numEls) + 1 > _c;
   }
   size_t _c;
@@ -66,6 +68,9 @@ class QuadTree {
 
   const std::vector<QuadNode<T>>& getNds() const;
   const QuadNode<T>& getNd(size_t nid) const;
+
+  // GeoJSON output
+  void print(std::ostream& o) const;
 
  private:
   size_t _maxDepth;

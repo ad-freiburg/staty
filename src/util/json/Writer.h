@@ -28,10 +28,11 @@ class WriterException : public std::exception {
 struct Null {};
 
 struct Val {
-  enum VAL_T { INT, FLOAT, STRING, ARRAY, DICT, BOOL, JSNULL };
+  enum VAL_T { UINT, INT, FLOAT, STRING, ARRAY, DICT, BOOL, JSNULL };
   VAL_T type;
-  int i;
-  double f;
+  int i = 0;
+  uint64_t ui = 0;
+  double f = 0;
   std::string str;
   std::vector<Val> arr;
   std::map<std::string, Val> dict;
@@ -43,6 +44,8 @@ struct Val {
   Val(const std::string& strC) { str = strC, type = STRING; }
   Val(const char* strC) { str = strC, type = STRING; }
   Val(double fC) { f = fC, type = FLOAT; }
+  Val(size_t iC) { ui = iC, type = UINT; }
+  Val(uint32_t iC) { ui = iC, type = UINT; }
   Val(int iC) { i = iC, type = INT; }
   Val(bool fC) { i = fC, type = BOOL; }
 };
@@ -70,6 +73,7 @@ class Writer {
   void val(const char* v);
   void val(double v);
   void val(int v);
+  void val(uint64_t v);
   void val(bool v);
   void val(Null);
   void val(const Val& v);

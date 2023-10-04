@@ -112,6 +112,12 @@ std::unordered_map<Node<N, E>*, C> BiDijkstra::shortestPathImpl(
     const util::graph::HeurFunc<N, E, C>& heurFunc,
     std::unordered_map<Node<N, E>*, EList<N, E>*> resEdges,
     std::unordered_map<Node<N, E>*, NList<N, E>*> resNodes) {
+  UNUSED(from);
+  UNUSED(to);
+  UNUSED(costFunc);
+  UNUSED(heurFunc);
+  UNUSED(resEdges);
+  UNUSED(resNodes);
   assert(false);
   // std::unordered_map<Node<N, E>*, C> costs;
   // if (to.size() == 0) return costs;
@@ -184,6 +190,8 @@ C BiDijkstra::relaxFwd(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
                        const util::graph::CostFunc<N, E, C>& costFunc,
                        const util::graph::HeurFunc<N, E, C>& heurFunc,
                        PQ<N, E, C>& pq, const Settled<N, E, C>& settledBwd) {
+  UNUSED(to);
+  UNUSED(heurFunc);
   C ret = costFunc.inf();
   for (auto edge : cur.n->getAdjListOut()) {
     C newC = costFunc(cur.n, edge, edge->getOtherNd(cur.n));
@@ -215,6 +223,7 @@ C BiDijkstra::relaxBwd(const std::set<Node<N, E>*>& froms,
                        const util::graph::CostFunc<N, E, C>& costFunc,
                        const util::graph::HeurFunc<N, E, C>& heurFunc,
                        PQ<N, E, C>& pq, const Settled<N, E, C>& settledFwd) {
+  UNUSED(froms);
   UNUSED(heurFunc);
   C ret = costFunc.inf();
   for (auto edge : cur.n->getAdjListIn()) {

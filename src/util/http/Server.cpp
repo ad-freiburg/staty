@@ -22,6 +22,7 @@
 #endif
 #include <vector>
 #include "Server.h"
+#include "util/Misc.h"
 #include "util/String.h"
 #include "util/log/Log.h"
 
@@ -319,6 +320,7 @@ std::string HttpServer::compress(const std::string& str, std::string* enc) {
   *enc = "gzip";
   return ret;
 #else
+  UNUSED(enc);
   return str;
 #endif
 }

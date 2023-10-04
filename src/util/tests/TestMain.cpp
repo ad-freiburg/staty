@@ -3,6 +3,7 @@
 //
 
 #include <string>
+#include <clocale>
 #include "util/Misc.h"
 #include "util/Nullable.h"
 #include "util/String.h"
@@ -30,6 +31,62 @@ int main(int argc, char** argv) {
 
   QuadTreeTest quadTreeTest;
   quadTreeTest.run();
+
+  // ___________________________________________________________________________
+  {
+    TEST(geo::frechetDist(Line<double>{{0, 0}, {10, 10}}, Line<double>{{0, 0},
+                                  {10, 10}}, 1) == approx(0));
+
+    TEST(geo::frechetDist(Line<double>{{0, 0}, {10, 10}}, Line<double>{{0, 0},
+                                  {10, 10}}, 0.1) == approx(0));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {10, 10}}, Line<double>{{0, 0},
+                                  {10, 0}}, 0.1) == approx(10));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {10, 10}}, Line<double>{{0, 0},
+                                  {0, 0}}, 0.1)
+        == approx(util::geo::dist(Point<double>{0, 0}, Point<double>{10, 10})));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {0, 10}}, Line<double>{{0, 0},
+                                  {0, 5}}, 0.1) == approx(10));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {0, 10}}, Line<double>{{0, 5},
+                                  {0, 5}}, 0.1) == approx(5));
+  }
+
+  // ___________________________________________________________________________
+  {
+    TEST(util::btsSimi("", ""), ==, approx(1));
+    TEST(util::btsSimi("Hallo", "Test"), ==, approx(0));
+    TEST(util::btsSimi("Test", "Hallo"), ==, approx(0));
+    TEST(util::btsSimi("Test", "Test"), ==, approx(1));
+    TEST(util::btsSimi("Milner Road / Wandlee Road", "Wandlee Road"), ==, approx(1));
+    TEST(util::btsSimi("bla blubb blob", "blubb blib"), ==, approx(0.9));
+    TEST(util::btsSimi("St Pancras International", "London St Pancras"), ==, approx(0.588235));
+    TEST(util::btsSimi("Reiterstrasse", "Reiterstrasse Freiburg im Breisgau"), ==, approx(1));
+    TEST(util::btsSimi("Reiterstrasse", "Reiter Freiburg im Breisgau"), ==, approx(.53333333));
+    TEST(util::btsSimi("AA", "Reiterstrasse, Freiburg im Breisgau"), ==, approx(0));
+    TEST(util::btsSimi("blibb blabbel bla blubb blob", "blubb blib blabb"), ==, approx(0.875));
+    TEST(util::btsSimi("blibb blabbel bla blubb blobo", "blubb blib blabb blabo"), ==, approx(0.84));
+    TEST(util::btsSimi("blubb blib blabb", "blibb blabbel bla blubb blob"), ==, approx(0.875));
+    TEST(util::btsSimi("blubbb blib blabb blobo", "blibb blabbel bla blubb blobo"), ==, approx(0.84));
+    TEST(util::btsSimi("Reiter Freiburg im Breisgau", "Reiter Frei burg im Brei sgau"), ==, approx(0.931034));
+    // fallback to jaccard
+    TEST(util::btsSimi("Freiburg im Breisgau, Germany, Main Railway Station", "Main Railway Station Freiburg im Breisgau, Germany"), ==, approx(1));
+
+  }
+
+  // ___________________________________________________________________________
+  {
+    std::string test = u8"Zuerich, Hauptbahnhof (Nord)";
+    auto tokens = util::tokenize(test);
+
+    TEST(tokens.size(), ==, 3);
+
+    TEST(util::jaccardSimi("Zuerich Hauptbahnhof Nord", "Zuerich, Hauptbahnhof (Nord)"), ==, approx(1));
+    TEST(util::jaccardSimi("Zuerich Hauptbahnhof", "Zuerich, Hauptbahnhof ()"), ==, approx(1));
+    TEST(util::jaccardSimi("Zuerich Hauptbahnhof", "Zuerich, Hauptbahnhof (Nord)"), ==, approx(2./3.));
+  }
 
   // ___________________________________________________________________________
   {
@@ -101,9 +158,9 @@ int main(int argc, char** argv) {
     DirNode<int, int>* a = new DirNode<int, int>(0);
     DirNode<int, int>* b = new DirNode<int, int>(0);
     g.addNd(a);
-    TEST(g.getNds()->size(), ==, (size_t)1);
+    TEST(g.getNds().size(), ==, (size_t)1);
     g.addNd(b);
-    TEST(g.getNds()->size(), ==, (size_t)2);
+    TEST(g.getNds().size(), ==, (size_t)2);
 
     g.addEdg(a, b);
     TEST(a->getDeg(), ==, (size_t)1);
@@ -142,9 +199,9 @@ int main(int argc, char** argv) {
     UndirNode<int, int>* a = new UndirNode<int, int>(0);
     UndirNode<int, int>* b = new UndirNode<int, int>(0);
     g.addNd(a);
-    TEST(g.getNds()->size(), ==, (size_t)1);
+    TEST(g.getNds().size(), ==, (size_t)1);
     g.addNd(b);
-    TEST(g.getNds()->size(), ==, (size_t)2);
+    TEST(g.getNds().size(), ==, (size_t)2);
 
     g.addEdg(a, b);
     TEST(a->getDeg(), ==, (size_t)1);
@@ -1784,4 +1841,50 @@ int main(int argc, char** argv) {
   TEST(geo::getWKT(geo::segment(DLine{{0, 0}, {0, 1}, {0, 2}}, 0, 0.5)), ==, "LINESTRING (0 0, 0 1)");
   TEST(geo::getWKT(geo::segment(DLine{{0, 0}, {0, 1}, {0, 2}}, 0.5, 1)), ==, "LINESTRING (0 1, 0 2)");
 }
+
+  // inversion count
+  std::vector<int> test = {2, 1};
+  TEST(inversions(test), ==, 1);
+
+  test = {};
+  TEST(inversions(test), ==, 0);
+
+  test = {2};
+  TEST(inversions(test), ==, 0);
+
+  test = {2, 1};
+  TEST(inversions(test), ==, 1);
+
+  test = {1, 2};
+  TEST(inversions(test), ==, 0);
+
+  test = {2, 1, 3};
+  TEST(inversions(test), ==, 1);
+
+  test = {2, 3, 1};
+  TEST(inversions(test), ==, 2);
+
+  test = {3, 2, 1};
+  TEST(inversions(test), ==, 3);
+
+  test = {1, 2, 3};
+  TEST(inversions(test), ==, 0);
+
+  test = {1, 3, 2, 6, 5, 4, 8, 7, 9};
+  TEST(inversions(test), ==, 5);
+
+  test = {1, 2, 3, 4, 5, 6};
+  TEST(inversions(test), ==, 0);
+
+  test = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+  TEST(inversions(test), ==, 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1);
+
+  // nice float formatting
+	TEST(formatFloat(15.564, 3), ==, "15.564");
+	TEST(formatFloat(15.564, 0), ==, "16");
+	TEST(formatFloat(15.0000, 10), ==, "15");
+	TEST(formatFloat(15.0100, 10), ==, "15.01");
+	TEST(formatFloat(0.0000, 10), ==, "0");
+	TEST(formatFloat(-1.0000, 10), ==, "-1");
+	TEST(formatFloat(-15.000001, 10), ==, "-15.000001");
 }

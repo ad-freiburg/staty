@@ -21,7 +21,7 @@ Node<N, E>* UndirGraph<N, E>::addNd() {
 // _____________________________________________________________________________
 template <typename N, typename E>
 Node<N, E>* UndirGraph<N, E>::addNd(UndirNode<N, E>* n) {
-  auto ins = Graph<N, E>::getNds()->insert(n);
+  auto ins = Graph<N, E>::_nodes.insert(n);
   return *ins.first;
 }
 
@@ -42,12 +42,14 @@ Edge<N, E>* UndirGraph<N, E>::addEdg(Node<N, E>* from, Node<N, E>* to,
 template <typename N, typename E>
 Node<N, E>* UndirGraph<N, E>::mergeNds(Node<N, E>* a, Node<N, E>* b) {
   for (auto e : a->getAdjListOut()) {
+    if (e->getFrom() != a) continue;
     if (e->getTo() != b) {
       addEdg(b, e->getTo(), e->pl());
     }
   }
 
   for (auto e : a->getAdjListIn()) {
+    if (e->getTo() != a) continue;
     if (e->getFrom() != b) {
       addEdg(e->getFrom(), b, e->pl());
     }
