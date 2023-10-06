@@ -61,7 +61,7 @@ void StatIdx::readFromFile(const std::string& path) {
             lng = a;
             sw = 1;
           }
-        } catch (std::invalid_argument*) {
+        } catch (std::invalid_argument&) {
           sw = 2;
           std::getline(rec, val, '\t');
           attrs[temp].push_back(val);
