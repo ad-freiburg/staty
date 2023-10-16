@@ -9,6 +9,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake gcc g++
       - name: cmake
@@ -22,6 +24,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake gcc g++
       - name: cmake
@@ -35,6 +39,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake clang
       - name: cmake
@@ -52,6 +58,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake clang
       - name: cmake
